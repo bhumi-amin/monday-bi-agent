@@ -159,6 +159,41 @@ def pipeline_summary(deals):
 
 ################################################################
 
+
+def extract_sector(question):
+
+    q = question.lower()
+
+    sectors = ["energy", "healthcare", "finance", "technology", "manufacturing"]
+
+    for sector in sectors:
+        if sector in q:
+            return sector.capitalize()
+
+    return None
+    
+########################################
+
+from datetime import datetime
+
+def extract_time_filter(question):
+
+    q = question.lower()
+
+    if "this quarter" in q:
+        return "quarter"
+
+    if "this month" in q:
+        return "month"
+
+    if "this year" in q:
+        return "year"
+
+    return None
+
+###########################################
+
+
 def interpret_question(question):
 
     q = question.lower()
@@ -227,6 +262,29 @@ if question:
 
     work_orders = fetch_board_data(5027142116)
     deals = fetch_board_data(5027142158)
+
+    ##############################
+    sector = extract_sector(question)
+    time_filter = extract_time_filter(question)
+
+    if sector and "Sector/service" in deals.columns:
+        deals = deals[deals["Sector/service"].str.contains(sector, case=False, na=False)]
+        st.write(f"📌 Filtered for sector: {sector}")
+
+    if time_filter and "Close Date" in deals.columns:
+        deals["Close Date"] = pd.to_datetime(deals["Close Date"], errors="coerce")
+
+        now = datetime.now()
+
+        if time_filter == "quarter":
+            current_quarter = (now.month - 1) // 3 + 1
+            deals = deals[deals["Close Date"].dt.quarter == current_quarter]
+            st.write("📅 Filtered for: This Quarter")
+
+        if time_filter == "month":
+            deals = deals[deals["Close Date"].dt.month == now.month]
+            st.write("📅 Filtered for: This Month")
+#################################
 
     if category == "pipeline":
         pipeline_summary(deals)
