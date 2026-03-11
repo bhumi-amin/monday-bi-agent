@@ -164,7 +164,7 @@ def extract_sector(question):
 
     q = question.lower()
 
-    sectors = ["energy", "healthcare", "finance", "technology", "manufacturing"]
+    sectors = ["mining", "powerline", "renewables", "railways", "construction", "others"]
 
     for sector in sectors:
         if sector in q:
